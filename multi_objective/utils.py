@@ -11,8 +11,8 @@ from torch.utils.data import DataLoader
 from torch.utils.data.distributed import DistributedSampler
 from pymoo.factory import get_decomposition, get_reference_directions, get_performance_indicator
 
-from .loaders import multi_mnist_loader
-from .models import MultiLeNet
+from .loaders import multi_mnist_loader, celeba_loader
+from .models import MultiLeNet, EfficientNet
 
 def dataset_from_name(dataset, **kwargs):
     if dataset == 'multi_mnist':
@@ -21,6 +21,8 @@ def dataset_from_name(dataset, **kwargs):
         return multi_mnist_loader.MultiMNIST(dataset='fashion', **kwargs)
     elif dataset == 'multi_fashion_mnist':
         return multi_mnist_loader.MultiMNIST(dataset='fashion_and_mnist', **kwargs)
+    elif dataset == 'celeba':
+        return celeba_loader.CelebA(**kwargs)
     else:
         raise ValueError("Unknown dataset: {}".format(dataset))
 
@@ -54,6 +56,9 @@ def loaders_from_name(dataset, seed, **kwargs):
 def model_from_dataset(dataset, **kwargs):
     if dataset == 'multi_mnist' or dataset == 'multi_fashion_mnist' or dataset == 'multi_fashion':
         return MultiLeNet(**kwargs)
+    elif dataset == 'celeba':
+        if 'efficientnet' in kwargs['model_name']:
+            return EfficientNet.from_pretrained(**kwargs)
     else:
         raise ValueError("Unknown model name {}".format(dataset))
 
