@@ -1,9 +1,11 @@
 import torch.nn.functional as F
+import torch
 
 
 def from_name(objectives, task_ids=None, **kwargs):
     map = {
         'CrossEntropyLoss': CrossEntropyLoss,
+        'BinaryCrossEntropyLoss': BinaryCrossEntropyLoss
         # Add your custom loss here
     }
     if len(task_ids) > 0:
@@ -35,3 +37,20 @@ class CrossEntropyLoss():
 
         return loss
 
+class BinaryCrossEntropyLoss(torch.nn.BCEWithLogitsLoss):
+    
+    def __init__(self, label_name='labels', logits_name='logits', pos_weight=None, **kwargs):
+        super().__init__(reduction='mean', pos_weight=torch.Tensor([pos_weight]).cuda() if pos_weight else None)
+        self.label_name = label_name
+        self.logits_name = logits_name
+    
+
+    def __call__(self, **kwargs):
+        logits = kwargs[self.logits_name]
+        labels = kwargs[self.label_name]
+        if logits.ndim == 2:
+            logits = torch.squeeze(logits)
+        if labels.dtype != torch.float:
+            labels = labels.float()
+        return super().__call__(logits, labels)
+    

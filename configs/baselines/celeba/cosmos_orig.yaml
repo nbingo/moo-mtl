@@ -1,0 +1,12 @@
+_BASE_: _base.yaml
+
+method: cosmos_orig
+
+alpha: 1.2
+lamda: 2.
+
+lr_scheduler: CosineAnnealing
+weight_decay: 0.0075
+
+lr: 0.0005
+batch_size: 128

@@ -11,8 +11,8 @@ from torch.utils.data import DataLoader
 from torch.utils.data.distributed import DistributedSampler
 from pymoo.factory import get_decomposition, get_reference_directions, get_performance_indicator
 
-from .loaders import multi_mnist_loader, celeba_loader
-from .models import MultiLeNet, EfficientNet
+from multi_objective.loaders import multi_mnist_loader, celeba_loader
+from multi_objective.models import MultiLeNet, EfficientNet
 
 def dataset_from_name(dataset, **kwargs):
     if dataset == 'multi_mnist':

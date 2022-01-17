@@ -1,4 +1,4 @@
-from models.efficient_net.model import EfficientNet
+from multi_objective.models.efficient_net.model import EfficientNet
 import torch
 
 # small wrapper

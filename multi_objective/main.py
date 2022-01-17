@@ -21,13 +21,13 @@ import torch.multiprocessing as mp
 import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel
 
-from logger import log_every_n_seconds, log_first_n, setup_logger
+from multi_objective.logger import log_every_n_seconds, log_first_n, setup_logger
 from multi_objective.utils import save_checkpoint
 
 from multi_objective import defaults, utils
 from multi_objective.objectives import from_name
 
-from multi_objective.methods import HypernetMethod, ParetoMTLMethod, SingleTaskMethod, COSMOSMethod, MGDAMethod, UniformScalingMethod, NSGA2Method
+from multi_objective.methods import HypernetMethod, ParetoMTLMethod, SingleTaskMethod, COSMOSMethod, MGDAMethod, UniformScalingMethod #, NSGA2Method
 from multi_objective.scores import from_objectives
 
 

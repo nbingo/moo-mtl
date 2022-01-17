@@ -12,6 +12,8 @@ _C.dataset = 'multi_mnist'
 
 # Dimension of the dataset. (Num of columns,) for tabular, (channels, height, width) for images
 _C.dim = (1, 36, 36)
+# Whether to augment the first dimension in dim for the COSMOS method.
+_C.augment_dim_for_cosmos = True
 
 # Objectives to optimize. For options see `objectives.py`
 _C.objectives = ["CrossEntropyLoss", "CrossEntropyLoss"]
@@ -21,8 +23,11 @@ _C.objectives = ["CrossEntropyLoss", "CrossEntropyLoss"]
 _C.task_ids = ["l", "r"]
 
 
+
 #
 # Model
+# Name of the model to use
+_C.model_name = 'FullyConnected' # Other option is efficientnet-b4
 #
 
 _C.channel_multiplier = 1.

@@ -1,3 +1,3 @@
 from .simple import MultiLeNet
 
-from models.efficient_net.efficient_net_wrapper import EfficientNetWrapper as EfficientNet
+from multi_objective.models.efficient_net.efficient_net_wrapper import EfficientNetWrapper as EfficientNet

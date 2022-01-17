@@ -68,9 +68,11 @@ class COSMOSMethod(BaseMethod):
         self.lamda = cfg.lamda
 
         dim = list(cfg.dim)
-        dim[0] = dim[0] + self.K
+        # only change the dim if not already manually changed
+        if cfg.augment_dim_for_cosmos:
+            dim[0] = dim[0] + self.K
 
-        model.change_input_dim(dim[0])
+            model.change_input_dim(dim[0])
         self.model = Upsampler(self.K, model, dim).to(self.device)
         
 

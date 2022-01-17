@@ -6,6 +6,7 @@ def from_objectives(obj_instances, metrics, objectives, task_ids=None, **kwargs)
     scores = {
         'CrossEntropyLoss': CrossEntropy,
         'mcr': mcr,
+        'BinaryCrossEntropyLoss': BinaryCrossEntropy
     }
     if len(task_ids) == 0:
         task_ids = list(obj_instances.keys())
@@ -40,7 +41,20 @@ class CrossEntropy(BaseScore):
         with torch.no_grad():
             return torch.nn.functional.cross_entropy(logits, labels.long(), reduction='mean', ignore_index=self.ignore_index).item()
 
+        
+class BinaryCrossEntropy(BaseScore):
+    
+    def __call__(self, **kwargs):
+        logits = kwargs[self.logits_name]
+        labels = kwargs[self.label_name]
 
+        if len(logits.shape) > 1 and logits.shape[1] == 1:
+            logits = torch.squeeze(logits)
+
+        with torch.no_grad():
+            return torch.nn.functional.binary_cross_entropy_with_logits(logits, labels.float(), reduction='mean').item()
+        
+        
 class mcr(BaseScore):
 
     def __call__(self, **kwargs):
