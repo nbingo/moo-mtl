@@ -1,4 +1,6 @@
 import torch
+import torch.nn as nn
+import numpy as np
 
 from multi_objective.utils import model_from_dataset
 from .base import BaseMethod
@@ -8,7 +10,9 @@ class LinearScalarizationMethod(BaseMethod):
 
     def __init__(self, objectives, model, cfg):
         super().__init__(objectives, model, cfg)
-        self.J = len(objectives)
+        self.alpha = cfg.alpha
+        self.lamda = cfg.lamda
+        self.K = len(objectives)
 
     
     def new_epoch(self, e):
@@ -41,11 +45,16 @@ class LinearScalarizationMethod(BaseMethod):
             loss_total = a * task_loss if not loss_total else loss_total + a * task_loss
             task_losses.append(task_loss)
         
-        loss_total = torch.sum(task_losses)
+        loss_total = torch.sum(torch.tensor(task_losses))
         return loss_total.item()
 
 
-    def eval_step(self, batch):
+    def eval_step(self, batch, preference_vector):
+        
         self.model.eval()
         with torch.no_grad():
+            batch['alpha'] = torch.from_numpy(preference_vector).to(self.device).float()
             return self.model(batch)
+        
+    def preference_at_inference(self):
+        return True
