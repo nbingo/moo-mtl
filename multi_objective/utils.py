@@ -231,11 +231,11 @@ class EvalResult():
             if self.pf.shape[1] <= 5:
                 assert self.pf.shape[1] == len(reference_point)
                 hv = get_performance_indicator("hv", ref_point=np.array(reference_point))
-                self.hv = hv.calc(self.pf)
+                self.hv = hv.do(self.pf)
         else:
             if self.pf.shape[1] <= 5:
                 hv = get_performance_indicator("hv", ref_point=np.array(reference_point))
-                self.hv = hv.calc(self.center)
+                self.hv = hv.do(self.center)
 
 
     def compute_optimal_sol(self, weights=None):
