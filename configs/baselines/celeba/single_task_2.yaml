@@ -1,0 +1,11 @@
+_BASE_: _base.yaml
+
+method: single_task
+
+task_id: 22
+
+lr_scheduler: CosineAnnealing
+lr: 0.0005
+weight_decay: 0.0075
+
+checkpointing: True

@@ -1,5 +1,5 @@
 dataset: celeba
-dim: [5, 64, 64]
+dim: [3, 64, 64]
 augment_dim_for_cosmos: False     # whether to augment the first dimension for the COSMOS method. We are doing it manually here so no need.
 task_ids: [16, 22]    # top left, bottom right
 objectives: [BinaryCrossEntropyLoss, BinaryCrossEntropyLoss]

@@ -20,6 +20,7 @@ import math
 import torch.multiprocessing as mp
 import torch.distributed as dist
 from torch.nn.parallel import DistributedDataParallel
+from torch.utils.tensorboard import SummaryWriter
 
 from multi_objective.logger import log_every_n_seconds, log_first_n, setup_logger
 from multi_objective.utils import save_checkpoint
@@ -204,7 +205,7 @@ def evaluate(e, method, scores, data_loader, split, result_dict, logdir, train_t
 def setup(rank, world_size):
     assert world_size > 1
     os.environ['MASTER_ADDR'] = 'localhost'
-    os.environ['MASTER_PORT'] = '12355'
+    os.environ['MASTER_PORT'] = '12356'
 
     # initialize the process group
     dist.init_process_group("nccl", rank=rank, world_size=world_size)
@@ -229,6 +230,9 @@ def main(rank, world_size, cfg, tag='', resume=False):
     if 'SLURMD_NODENAME' in os.environ:
         logger.info(f"Running on node {os.environ['SLURMD_NODENAME']}")
     logger.info(f"\n\n>>>> Running method {cfg.method} <<<<\n")
+    
+    if rank == 0:
+        writer = SummaryWriter(log_dir=os.path.join(logdir, 'tensorboard_log'))
 
     torch.cuda.set_device(rank)
 
@@ -323,10 +327,15 @@ def main(rank, world_size, cfg, tag='', resume=False):
                         dist.broadcast(t, src=0)                        # re-distribute
 
             assert not math.isnan(loss)
+            rm_loss = rm1(loss)
             log_every_n_seconds(logging.INFO, 
-                f"Epoch {e:03d}, batch {b:03d}, train_loss {loss:.4f}, rm train_loss {rm1(loss):.3f}",
+                f"Epoch {e:03d}, batch {b:03d}, train_loss {loss:.4f}, rm train_loss {rm_loss:.3f}",
                 n=5
             )
+            if rank == 0:
+                n_iter =  e * len(train_loader) + b
+                writer.add_scalar('loss/train', loss, n_iter)
+                writer.add_scalar('rm_loss/train', rm_loss, n_iter)
 
         tock = time.time()
         elapsed_time += (tock - tick)
@@ -376,6 +385,7 @@ def main(rank, world_size, cfg, tag='', resume=False):
                 # if 'hv' in e_results and e_results['hv'] > best_hv_sofar:
                 best_hv_sofar = e_results['hv']
                 best_idx_sofar = e
+                writer.add_scalar('hypervolume/eval', e_results['hv'], e)
 
         if cfg['test_eval_every'] > 0 and (e+1) % cfg['test_eval_every'] == 0 and e > 0:
             # Test results
