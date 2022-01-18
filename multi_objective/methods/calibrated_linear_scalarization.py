@@ -6,7 +6,7 @@ from multi_objective.utils import model_from_dataset
 from .base import BaseMethod
 
 
-class LinearScalarizationMethod(BaseMethod):
+class CalibratedLinearScalarizationMethod(BaseMethod):
 
     def __init__(self, objectives, model, cfg):
         super().__init__(objectives, model, cfg)
@@ -44,7 +44,9 @@ class LinearScalarizationMethod(BaseMethod):
             task_loss = self.objectives[t](**batch)
             loss_total = a * task_loss if not loss_total else loss_total + a * task_loss
             task_losses.append(task_loss)
-        
+        cossim = torch.nn.functional.cosine_similarity(torch.stack(task_losses), batch['alpha'], dim=0)
+        loss_total -= self.lamda * cossim
+            
         loss_total.backward()
         return loss_total.item()
 

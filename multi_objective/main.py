@@ -28,7 +28,7 @@ from multi_objective.utils import save_checkpoint
 from multi_objective import defaults, utils
 from multi_objective.objectives import from_name
 
-from multi_objective.methods import HypernetMethod, ParetoMTLMethod, SingleTaskMethod, COSMOSMethod, MGDAMethod, UniformScalingMethod, LinearScalarizationMethod #, NSGA2Method
+from multi_objective.methods import HypernetMethod, ParetoMTLMethod, SingleTaskMethod, COSMOSMethod, MGDAMethod, UniformScalingMethod, LinearScalarizationMethod, CalibratedLinearScalarizationMethod #, NSGA2Method
 from multi_objective.scores import from_objectives
 
 
@@ -65,6 +65,8 @@ def method_from_name(objectives, model, cfg):
         return UniformScalingMethod(objectives, model, cfg)
     elif method == 'linear_scalarization':
         return LinearScalarizationMethod(objectives, model, cfg)
+    elif method == 'calibrated_linear_scalarization':
+        return CalibratedLinearScalarizationMethod(objectives, model, cfg)
     else:
         raise ValueError("Unkown method {}".format(method))
 
