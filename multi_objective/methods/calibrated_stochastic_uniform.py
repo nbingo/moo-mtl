@@ -6,7 +6,7 @@ from multi_objective.utils import model_from_dataset
 from .base import BaseMethod
 
 
-class CalibratedLinearScalarizationMethod(BaseMethod):
+class CalibratedStochasticUniformMethod(BaseMethod):
 
     def __init__(self, objectives, model, cfg):
         super().__init__(objectives, model, cfg)
@@ -51,12 +51,9 @@ class CalibratedLinearScalarizationMethod(BaseMethod):
         return loss_total.item()
 
 
-    def eval_step(self, batch, preference_vector):
+    def eval_step(self, batch):
         
         self.model.eval()
         with torch.no_grad():
-            batch['alpha'] = torch.from_numpy(preference_vector).to(self.device).float()
             return self.model(batch)
         
-    def preference_at_inference(self):
-        return True

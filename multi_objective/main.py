@@ -181,6 +181,7 @@ def evaluate(e, method, scores, data_loader, split, result_dict, logdir, train_t
 
         # plot pareto front to pf
         for eval_mode, score in score_values.items():
+            print('Plotting pareto front...')
             pareto_front = utils.ParetoFront(
                 ["-".join([str(t), eval_mode]) for t in task_ids], 
                 logdir,

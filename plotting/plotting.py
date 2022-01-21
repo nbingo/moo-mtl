@@ -67,7 +67,7 @@ def pairwise(iterable):
 
 def get_hv(sol):
     hv = get_performance_indicator("hv", ref_point=np.array([1, 1]))
-    return hv.calc(np.array(sol))
+    return hv.do(np.array(sol))
 
 
 def adjust_lightness(color, amount=0.5):

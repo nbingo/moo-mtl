@@ -1,60 +1,91 @@
 import torch
-import torch.nn as nn
 import numpy as np
-
-from multi_objective.utils import model_from_dataset
+from copy import deepcopy
+from collections import OrderedDict
 from .base import BaseMethod
-
+from multi_objective import utils
 
 class LinearScalarizationMethod(BaseMethod):
 
     def __init__(self, objectives, model, cfg):
         super().__init__(objectives, model, cfg)
-        self.alpha = cfg.alpha
-        self.lamda = cfg.lamda
-        self.K = len(objectives)
+        self.truncated_preference_rays = utils.reference_points(partitions=cfg['n_partitions'], dim=len(self.objectives))[1:]
+        # The preference ray of the self.model model
+        self.base_preference_ray = utils.reference_points(partitions=cfg['n_partitions'], dim=len(self.objectives))[0]
+        if cfg.task_id is None:
+            # Create copies for all reference points except for the first one, which will be handled by 
+            self.models = {preference_ray: deepcopy(model) 
+                           for preference_ray in self.truncated_preference_rays}
+            self.optimizers = {preference_ray: torch.optim.Adam(m.parameters(), lr=cfg.lr, weight_decay=cfg.weight_decay) 
+                               for preference_ray in self.truncated_preference_rays}
+            self.schedulers = {preference_ray: utils.get_lr_scheduler(cfg.lr_scheduler, o, cfg, '') 
+                               for preference_ray in self.truncated_preference_rays}
+            print('num models:', len(self.models))
 
-    
+        self.task_id = cfg.task_id
+        
+
+    # TODO: fix for dict
+    def state_dict(self):
+        if self.task_id is None:
+            state = OrderedDict()
+            for i, (m, o, s) in enumerate(zip(self.models, self.optimizers, self.schedulers)):
+                state[f'model.{i}'] = m.state_dict()
+                state[f'optimizer.{i}'] = o.state_dict()
+                state[f'lr_scheduler.{i}'] = s.state_dict()
+            return state
+
+     # TODO: fix for dict
+    def load_state_dict(self, dict):
+        if self.task_id is None:
+            for i in range(len(self.models)):
+                self.models[i].load_state_dict(dict[f'model.{i}'])
+                self.optimizers[i].load_state_dict(dict[f'optimizer.{i}'])
+                self.schedulers[i].load_state_dict(dict[f'lr_scheduler.{i}'])
+
+
+
     def new_epoch(self, e):
-        self.model.train()
+        if self.task_id is None:
+            for m in self.models.values():
+                m.train()
+            if e>0:
+                for s in self.schedulers.values():
+                    s.step()
 
 
     def step(self, batch):
-        # step 1: sample alphas
-        if isinstance(self.alpha, list):
-            batch['alpha']  = torch.from_numpy(
-                np.random.dirichlet(self.alpha, 1).astype(np.float32).flatten()
-            ).cuda()
-        elif self.alpha > 0:
-            batch['alpha']  = torch.from_numpy(
-                np.random.dirichlet([self.alpha for _ in range(self.K)], 1).astype(np.float32).flatten()
-            ).cuda()
-        else:
-            raise ValueError(f"Unknown value for alpha: {self.alpha}, expecting list or float.")
-
-
-        # step 2: calculate loss
+        losses = []
+        if self.task_id is None:
+            for preference_ray in self.truncated_preference_rays:
+                optim = self.optimizers[preference_ray]
+                model = self.models[preference_ray]
+                optim.zero_grad()
+                result = self._step(batch, model, preference_ray)
+                optim.step()
+                losses.append(result)
+        
+        # task zero we take the model we got via __init__
         self.model.zero_grad()
-        
-        logits = self.model(batch)
-        batch.update(logits)
-        loss_total = None
-        task_losses = []
-        for a, t in zip(batch['alpha'], self.task_ids):
-            task_loss = self.objectives[t](**batch)
-            loss_total = a * task_loss if not loss_total else loss_total + a * task_loss
-            task_losses.append(task_loss)
-        
-        loss_total.backward()
-        return loss_total.item()
+        result = self._step(batch, self.model, self.base_preference_ray)
+        losses.append(result)
+        return np.mean(losses).item()
+
+
+    def _step(self, batch, model, preference_ray):
+        batch.update(model(batch))
+        loss = 0
+        # Take the weighted average of the objectvives according to the preference ray
+        for i, objective in enumerate(self.objectives):
+            loss += objective(**batch) * preference_ray[i]
+        loss.backward()
+        return loss.item()
 
 
     def eval_step(self, batch, preference_vector):
-        
-        self.model.eval()
         with torch.no_grad():
-            batch['alpha'] = torch.from_numpy(preference_vector).to(self.device).float()
-            return self.model(batch)
-        
+            model = self.model if preference_vector == self.base_preference_ray else self.models[preference_vector]
+            return model(batch)
+
     def preference_at_inference(self):
         return True
