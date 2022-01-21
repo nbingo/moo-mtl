@@ -5,5 +5,5 @@ from .pareto_mtl import ParetoMTLMethod
 from .single_task import SingleTaskMethod
 from .uniform import UniformScalingMethod
 from .linear_scalarization import LinearScalarizationMethod
-from .calibrated_linear_scalarization import CalibratedLinearScalarizationMethod
+# from .calibrated_linear_scalarization import CalibratedLinearScalarizationMethod
 # from .nsga2 import NSGA2Method
