@@ -11,6 +11,7 @@ class BaseMethod():
         self.model = model
         self.device = cfg.device
         self.task_ids = cfg.task_ids
+        self.preference_idx_at_inference = False
 
         if len(self.task_ids) == 0:
             self.task_ids = list(objectives.keys())

@@ -9,4 +9,4 @@ weight_decay: 0.0075
 
 checkpointing: True
 
-n_partitions: 10
+n_partitions: 6
