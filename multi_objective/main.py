@@ -130,7 +130,7 @@ def evaluate(e, method, scores, data_loader, split, result_dict, logdir, train_t
                 for i, ray in enumerate(pareto_rays):
                     log_every_n_seconds(logging.INFO, f"Eval batch {b}/{len(data_loader)} Ray {i}/{n_rays}", n=5)
                     if method.preference_idx_at_inference:
-                        logits = method.eval_step(batch, preference_vector=ray, preference_idx=i)
+                        logits = method.eval_step(batch, preference_vector=ray, preference_vector_idx=i)
                     else:
                         logits = method.eval_step(batch, preference_vector=ray)
                     batch.update(logits)

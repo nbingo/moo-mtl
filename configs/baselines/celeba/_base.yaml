@@ -4,5 +4,6 @@ augment_dim_for_cosmos: False     # whether to augment the first dimension for t
 task_ids: [16, 22]    # top left, bottom right
 objectives: [BinaryCrossEntropyLoss, BinaryCrossEntropyLoss]
 epochs: 30
-eval_every: 2
+eval_every: 5
+test_eval_every: 5
 model_name: 'efficientnet-b4'

@@ -83,7 +83,7 @@ class LinearScalarizationMethod(BaseMethod):
 
     def eval_step(self, batch, preference_vector, preference_vector_idx=None):
         with torch.no_grad():
-            model = self.model if i == 0 else self.models[i]
+            model = self.model if preference_vector_idx == 0 else self.models[preference_vector_idx - 1]
             return model(batch)
 
     def preference_at_inference(self):
