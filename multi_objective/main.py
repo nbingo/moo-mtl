@@ -28,7 +28,7 @@ from multi_objective.utils import save_checkpoint
 from multi_objective import defaults, utils
 from multi_objective.objectives import from_name
 
-from multi_objective.methods import HypernetMethod, ParetoMTLMethod, SingleTaskMethod, COSMOSMethod, MGDAMethod, UniformScalingMethod, LinearScalarizationMethod#, CalibratedLinearScalarizationMethod #, NSGA2Method
+from multi_objective.methods import HypernetMethod, ParetoMTLMethod, SingleTaskMethod, COSMOSMethod, MGDAMethod, UniformScalingMethod, LinearScalarizationMethod, CalibratedLinearScalarizationMethod #, NSGA2Method
 from multi_objective.scores import from_objectives
 
 
