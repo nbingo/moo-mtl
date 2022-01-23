@@ -3,7 +3,7 @@ _BASE_: _base.yaml
 method: cosmos
 
 alpha: 1.0
-lamda: 2.
+lamda: .1
 
 lr_scheduler: CosineAnnealing
 lr: 0.00075
