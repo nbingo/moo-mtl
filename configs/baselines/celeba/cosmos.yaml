@@ -1,6 +1,6 @@
 _BASE_: _base.yaml
 
-method: cosmos_orig
+method: cosmos
 
 dim: [5, 64, 64]
 alpha: 0.2
