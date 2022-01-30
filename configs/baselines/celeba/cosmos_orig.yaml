@@ -4,7 +4,7 @@ method: cosmos_orig
 
 dim: [5, 64, 64]
 alpha: 1.2
-lamda: 8.
+lamda: 15.
 
 lr_scheduler: CosineAnnealing
 weight_decay: 0.0075

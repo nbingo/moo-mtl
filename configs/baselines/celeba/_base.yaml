@@ -7,3 +7,4 @@ epochs: 30
 eval_every: 5
 test_eval_every: 5
 model_name: 'efficientnet-b4'
+metrics: [mcr, mcr]
