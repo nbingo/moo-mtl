@@ -28,7 +28,7 @@ from multi_objective.utils import save_checkpoint
 from multi_objective import defaults, utils
 from multi_objective.objectives import from_name
 
-from multi_objective.methods import HypernetMethod, ParetoMTLMethod, SingleTaskMethod, COSMOSMethod, MGDAMethod, UniformScalingMethod, LinearScalarizationMethod, CalibratedLinearScalarizationMethod #, NSGA2Method
+from multi_objective.methods import HypernetMethod, ParetoMTLMethod, SingleTaskMethod, COSMOSMethod, MGDAMethod, UniformScalingMethod, LinearScalarizationMethod, CalibratedLinearScalarizationMethod, SubspaceMethod #, NSGA2Method
 from multi_objective.scores import from_objectives
 
 
@@ -67,6 +67,8 @@ def method_from_name(objectives, model, cfg):
         return LinearScalarizationMethod(objectives, model, cfg)
     elif method == 'calibrated_linear_scalarization':
         return CalibratedLinearScalarizationMethod(objectives, model, cfg)
+    elif method == 'subspace':
+        return SubspaceMethod(objecctives, model, cfg)
     else:
         raise ValueError("Unkown method {}".format(method))
 
@@ -288,7 +290,7 @@ def main(rank, world_size, cfg, tag='', resume=False):
 
         map_location = {'cuda:%d' % 0: 'cuda:%d' % rank} if world_size > 1 else None
         checkpoint = torch.load(os.path.join(logdir, 'checkpoint.pth'), map_location)
-
+        
         method.load_state_dict(checkpoint['method'])
         model.load_state_dict(checkpoint['model'])
         optimizer.load_state_dict(checkpoint['optimizer'])

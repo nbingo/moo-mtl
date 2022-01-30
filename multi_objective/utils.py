@@ -13,6 +13,7 @@ from pymoo.factory import get_decomposition, get_reference_directions, get_perfo
 
 from multi_objective.loaders import multi_mnist_loader, celeba_loader
 from multi_objective.models import MultiLeNet, EfficientNet
+from multi_objective.methods.subspace_wrapper import to_subspace_class
 
 def dataset_from_name(dataset, **kwargs):
     if dataset == 'multi_mnist':
@@ -54,13 +55,27 @@ def loaders_from_name(dataset, seed, **kwargs):
 
 
 def model_from_dataset(dataset, **kwargs):
-    if dataset == 'multi_mnist' or dataset == 'multi_fashion_mnist' or dataset == 'multi_fashion':
-        return MultiLeNet(**kwargs)
-    elif dataset == 'celeba':
-        if 'efficientnet' in kwargs['model_name']:
-            return EfficientNet.from_pretrained(**kwargs)
-    else:
-        raise ValueError("Unknown model name {}".format(dataset))
+    if 'subspace' in kwargs['method']:
+        if dataset == 'multi_mnist' or dataset == 'multi_fashion_mnist' or dataset == 'multi_fashion':
+            model = to_subspace_model(MultiLeNet, num_vertices=len(kwargs['task_ids']))(**kwargs)
+        elif dataset == 'celeba':
+            if 'efficientnet' in kwargs['model_name']:
+                ## TODO: To make this work need to save state dict and then re-load using subspace model wrapper
+                model = EfficientNet.from_pretrained(**kwargs)
+                model = to_subspace_model(EfficientNet, num_vertices=len(kwargs['task_ids'])).load_state_dict(model.state_dict())
+        else:
+            raise ValueError("Unknown model name {}".format(dataset))
+    else: 
+        if dataset == 'multi_mnist' or dataset == 'multi_fashion_mnist' or dataset == 'multi_fashion':
+            model = MultiLeNet(**kwargs)
+        elif dataset == 'celeba':
+            if 'efficientnet' in kwargs['model_name']:
+                model = EfficientNet.from_pretrained(**kwargs)
+        else:
+            raise ValueError("Unknown model name {}".format(dataset))
+    
+        return to_subspace_class(model)
+    
 
 
 def get_lr_scheduler(lr_scheduler, optimizer, cfg, tag):
