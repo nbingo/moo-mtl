@@ -1,10 +1,12 @@
 dataset: celeba
 dim: [3, 64, 64]
 augment_dim_for_cosmos: False     # whether to augment the first dimension for the COSMOS method. We are doing it manually here so no need.
-task_ids: [16, 22]    # top left, bottom right
+# task_ids: [16, 22]    
+task_ids: [21, 27]
 objectives: [BinaryCrossEntropyLoss, BinaryCrossEntropyLoss]
 epochs: 30
 eval_every: 5
 test_eval_every: 5
 model_name: 'efficientnet-b4'
 metrics: [mcr, mcr]
+batch_size: 128

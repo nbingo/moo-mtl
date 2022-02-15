@@ -2,7 +2,6 @@ import torch
 
 from multi_objective.utils import model_from_dataset
 from .base import BaseMethod
-from .subspace_wrapper import to_subspace_class
 
 
 class SubspaceMethod(BaseMethod):

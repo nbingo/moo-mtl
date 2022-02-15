@@ -13,7 +13,8 @@ from pymoo.factory import get_decomposition, get_reference_directions, get_perfo
 
 from multi_objective.loaders import multi_mnist_loader, celeba_loader
 from multi_objective.models import MultiLeNet, EfficientNet
-from multi_objective.methods.subspace_wrapper import to_subspace_class
+from multi_objective.models.efficient_net.utils import get_model_params
+from subspace_wrapper import to_subspace_class
 
 def dataset_from_name(dataset, **kwargs):
     if dataset == 'multi_mnist':
@@ -57,12 +58,12 @@ def loaders_from_name(dataset, seed, **kwargs):
 def model_from_dataset(dataset, **kwargs):
     if 'subspace' in kwargs['method']:
         if dataset == 'multi_mnist' or dataset == 'multi_fashion_mnist' or dataset == 'multi_fashion':
-            model = to_subspace_model(MultiLeNet, num_vertices=len(kwargs['task_ids']))(**kwargs)
+            model = to_subspace_class(MultiLeNet, num_vertices=len(kwargs['task_ids']))(**kwargs)
         elif dataset == 'celeba':
             if 'efficientnet' in kwargs['model_name']:
-                ## TODO: To make this work need to save state dict and then re-load using subspace model wrapper
-                model = EfficientNet.from_pretrained(**kwargs)
-                model = to_subspace_model(EfficientNet, num_vertices=len(kwargs['task_ids'])).load_state_dict(model.state_dict())
+                blocks_args, global_params = get_model_params(kwargs['model_name'], None)
+                model = to_subspace_class(EfficientNet, num_vertices=len(kwargs['task_ids']))(blocks_args, global_params)
+                model.load_state_dict(EfficientNet.from_pretrained(**kwargs).state_dict())
         else:
             raise ValueError("Unknown model name {}".format(dataset))
     else: 
@@ -74,7 +75,7 @@ def model_from_dataset(dataset, **kwargs):
         else:
             raise ValueError("Unknown model name {}".format(dataset))
     
-        return to_subspace_class(model)
+        return model
     
 
 

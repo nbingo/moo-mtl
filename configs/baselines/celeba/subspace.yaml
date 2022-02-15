@@ -1,11 +1,12 @@
 _BASE_: _base.yaml
 
-method: single_task
+method: subspace
 
-task_id: 21
 
 lr_scheduler: CosineAnnealing
 lr: 0.0005
 weight_decay: 0.0075
 
 checkpointing: True
+
+eval_every: 5
